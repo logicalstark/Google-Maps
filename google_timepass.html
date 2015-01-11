@@ -1,0 +1,113 @@
+<html>
+<head>
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+    <script type="text/javascript">
+  var poly, map;
+  var markers = [];
+  var path = new google.maps.MVCArray;
+// http://jsfiddle.net/nk4f5h3t/
+  function initialize() {
+    var uluru = new google.maps.LatLng(23.0245, 72.56888);
+
+    map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 10,
+      center: uluru,
+      mapTypeId: google.maps.MapTypeId.ROAD
+    });
+
+    poly = new google.maps.Polygon({
+      strokeWeight: 3,
+      fillColor: '#5555FF'
+    });
+    poly.setMap(map);
+    poly.setPaths(new google.maps.MVCArray([path]));
+
+    google.maps.event.addListener(map, 'click', addPoint);
+
+  }
+    mpoint = 0;
+  function addPoint(event) {
+    if(mpoint==6)
+    {
+    	console.log("You can't add "+mpoint+"th marker on map");
+        alert("you can add only six marker");
+        return false;
+    }
+      console.log("added "+mpoint+"th marker");
+      $('.lat'+mpoint).val(event.latLng.lat());
+      $('.lng'+mpoint).val(event.latLng.lng());
+      mpoint++;
+
+    path.insertAt(path.length, event.latLng);
+    var marker = new google.maps.Marker({
+      position: event.latLng,
+      map: map,
+      draggable: true
+    });
+    markers.push(marker);
+    tag_no = path.length - 1;
+    marker.setTitle("#" + tag_no);
+
+    google.maps.event.addListener(marker, 'click', function() {
+        if(mpoint>0)
+        {
+          marker.setMap(null);
+          for (var i = 0, I = markers.length; i < I && markers[i] != marker; ++i);
+          markers.splice(i, 1);
+          console.log("removing "+i+"th marker");
+
+// the beauty of code
+          for(j=i; j<6; j++)
+          {
+            var ii = j+1;
+            console.log("Replacing "+ii+"th marker's latlng to "+j+"'s latlng");
+            $('.lat'+j).val($('.lat'+ii).val());
+            $('.lng'+j).val($('.lng'+ii).val());
+            $('.lat'+ii).val("");
+            $('.lng'+ii).val("");
+          }
+
+          path.removeAt(i);         
+          mpoint--;
+        }
+        else
+        {
+            return false;
+        }
+      }
+    );
+    google.maps.event.addListener(marker, 'dragend', function() {
+      for (var i = 0, I = markers.length; i < I && markers[i] != marker; ++i);
+        console.log(i);
+      path.setAt(i, marker.getPosition());
+      }
+    );
+  }
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>
+</head>
+<body style="margin:0px; padding:0px;" >
+  <div id="map" style="width: 480; height: 480; float: left" ></div>
+
+    <div>
+        <input type="text" name="lat0" value="" class="lat0"/>
+        <input type="text" name="lng0" value="" class="lng0"/><br>
+        <input type="text" name="lat1" value="" class="lat1"/>
+        <input type="text" name="lng1" value="" class="lng1"/><br>
+        <input type="text" name="lat2" value="" class="lat2"/>
+        <input type="text" name="lng2" value="" class="lng2"/><br>
+        <input type="text" name="lat3" value="" class="lat3"/>
+        <input type="text" name="lng3" value="" class="lng3"/><br>
+        <input type="text" name="lat4" value="" class="lat4"/>
+        <input type="text" name="lng4" value="" class="lng4"/><br>
+        <input type="text" name="lat5" value="" class="lat5"/>
+        <input type="text" name="lng5" value="" class="lng5"/><br>
+<h1>Add and remove the Marker and Make Geofence</h1>
+    </div>
+
+</body>
+</html>
